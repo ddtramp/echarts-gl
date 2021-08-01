@@ -35,15 +35,33 @@
                     },
                     splitLine: {
                         interval: 1
-                    }
+                    },
+                    splitArea: {
+                        show: true,
+                        areaStyle: {
+                            color: ['yellow']
+                        }
+                    },
                 },
                 yAxis3D: {
+                    splitArea: {
+                        show: true,
+                        areaStyle: {
+                            color: ['#000']
+                        }
+                    },
                     type: 'category',
                     data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
                 },
                 zAxis3D: {
                     type: 'value',
-                    min: 0, max: 100
+                    min: 0, max: 100,
+                    splitArea: {
+                        show: true,
+                        areaStyle: {
+                            color: ['blue']
+                        }
+                    },
                 },
                 grid3D: {
                     // top: -50,
@@ -67,18 +85,16 @@
                             width: 1
                         }
                     },
-                    splitArea: {
-                        show: true,
-                        areaStyle: {
-                            color: ['rgba(0,0,0,0.2)','rgba(50,50,50,0.2)']
-                        }
-                    },
+      
                     axisLabel: {
                         textStyle: {
                             fontSize: 14
                         }
-                    }
+                    },
+                    // jack add next line
+                    showGridConfig: [true, true, false] // [front, bottom, right] means [1, 2, 3] 
                 },
+                onlyOneGrid: true, // jack add line
                 series: []
             });
 
