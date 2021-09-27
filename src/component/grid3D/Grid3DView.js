@@ -164,6 +164,8 @@ export default echarts.ComponentView.extend({
     this._axisLabelSurface.clear();
 
     control.off("update");
+    // api.off("rendered", this._updateAxisLinePosition);
+
     if (grid3DModel.get("show")) {
       this._faces.forEach(function (face) {
         face.update(grid3DModel, ecModel, api);
@@ -174,6 +176,7 @@ export default echarts.ComponentView.extend({
     }
 
     control.on("update", this._onCameraChange.bind(this, grid3DModel, api), this);
+    // api.on("rendered", this._updateAxisLinePosition.bind(this));
 
     this._sceneHelper.setScene(cartesian.viewGL.scene);
     this._sceneHelper.updateLight(grid3DModel);
@@ -183,6 +186,13 @@ export default echarts.ComponentView.extend({
     cartesian.viewGL.setTemporalSuperSampling(grid3DModel.getModel("temporalSuperSampling"));
 
     this._initMouseHandler(grid3DModel);
+
+    if (
+      Reflect.has(grid3DModel.option, "afterRenderedUpdateAxisPosition") &&
+      grid3DModel.option.afterRenderedUpdateAxisPosition
+    ) {
+      this._updateAxisLinePosition();
+    }
   },
 
   afterRender: function (grid3DModel, ecModel, api, layerGL) {
