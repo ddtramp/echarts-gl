@@ -164,7 +164,6 @@ export default echarts.ComponentView.extend({
     this._axisLabelSurface.clear();
 
     control.off("update");
-    // api.off("rendered", this._updateAxisLinePosition);
 
     if (grid3DModel.get("show")) {
       this._faces.forEach(function (face) {
@@ -176,7 +175,6 @@ export default echarts.ComponentView.extend({
     }
 
     control.on("update", this._onCameraChange.bind(this, grid3DModel, api), this);
-    // api.on("rendered", this._updateAxisLinePosition.bind(this));
 
     this._sceneHelper.setScene(cartesian.viewGL.scene);
     this._sceneHelper.updateLight(grid3DModel);
