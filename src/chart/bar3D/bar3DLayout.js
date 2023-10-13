@@ -147,13 +147,19 @@ function getValueDimension(data, dataDims) {
 export default function registerBarLayout(registers) {
     registers.registerLayout(function (ecModel, api) {
         ecModel.eachSeriesByType('bar3D', function (seriesModel) {
+
+            let inverseBar3DIncludeZero = false
+            if (ecModel.option.onlyOneGrid) {
+                inverseBar3DIncludeZero = ecModel.option.inverseBar3DIncludeZero
+            }
+
             var coordSys = seriesModel.coordinateSystem;
             var coordSysType = coordSys && coordSys.type;
             if (coordSysType === 'globe') {
                 globeLayout(seriesModel, coordSys);
             }
             else if (coordSysType === 'cartesian3D') {
-                cartesian3DLayout(seriesModel, coordSys);
+                cartesian3DLayout(seriesModel, coordSys, inverseBar3DIncludeZero);
             }
             else if (coordSysType === 'geo3D') {
                 geo3DLayout(seriesModel, coordSys);

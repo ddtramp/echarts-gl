@@ -3,13 +3,15 @@ import glmatrix from 'claygl/src/dep/glmatrix';
 var vec3 = glmatrix.vec3;
 var isDimensionStacked = echarts.helper.dataStack.isDimensionStacked;
 
-function ifCrossZero(extent) {
+function ifCrossZero(extent, inverseBar3DIncludeZero = false) {
     var min = extent[0];
     var max = extent[1];
-    return !((min > 0 && max > 0) || (min < 0 && max < 0));
+
+    const defaultAlgorithm = !((min > 0 && max > 0) || (min < 0 && max < 0));
+    return inverseBar3DIncludeZero ? !((min > 0 && max > 0) || (min < 0 && max <= 0)): defaultAlgorithm
 };
 
-function cartesian3DLayout(seriesModel, coordSys) {
+function cartesian3DLayout(seriesModel, coordSys, inverseBar3DIncludeZero = false) {
 
     var data = seriesModel.getData();
     // var barOnPlane = seriesModel.get('onGridPlane');
@@ -42,7 +44,7 @@ function cartesian3DLayout(seriesModel, coordSys) {
     }
 
     var zAxisExtent = coordSys.getAxis('z').scale.getExtent();
-    var ifZAxisCrossZero = ifCrossZero(zAxisExtent);
+    var ifZAxisCrossZero = ifCrossZero(zAxisExtent, inverseBar3DIncludeZero);
 
     var dims = ['x', 'y', 'z'].map(function (coordDimName) {
         return seriesModel.coordDimToDataDim(coordDimName)[0];
