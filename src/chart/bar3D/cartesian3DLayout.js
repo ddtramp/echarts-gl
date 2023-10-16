@@ -18,12 +18,9 @@ function cartesian3DLayout(seriesModel, coordSys) {
 
     var barSize = seriesModel.get('barSize');
 
-                console.log('seriesModel :>> ', seriesModel)
-
 
     const inverseBar3DIncludeZero = seriesModel.get('inverseBar3DIncludeZero') || false;
 
-    console.log('inverseBar3DIncludeZero :>> ', inverseBar3DIncludeZero)
 
     if (barSize == null) {
         var size = coordSys.size;
