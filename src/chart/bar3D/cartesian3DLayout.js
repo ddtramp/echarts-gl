@@ -11,12 +11,20 @@ function ifCrossZero(extent, inverseBar3DIncludeZero = false) {
     return inverseBar3DIncludeZero ? !((min > 0 && max > 0) || (min < 0 && max <= 0)): defaultAlgorithm
 };
 
-function cartesian3DLayout(seriesModel, coordSys, inverseBar3DIncludeZero = false) {
+function cartesian3DLayout(seriesModel, coordSys) {
 
     var data = seriesModel.getData();
     // var barOnPlane = seriesModel.get('onGridPlane');
 
     var barSize = seriesModel.get('barSize');
+
+                console.log('seriesModel :>> ', seriesModel)
+
+
+    const inverseBar3DIncludeZero = seriesModel.get('inverseBar3DIncludeZero') || false;
+
+    console.log('inverseBar3DIncludeZero :>> ', inverseBar3DIncludeZero)
+
     if (barSize == null) {
         var size = coordSys.size;
         var barWidth;
