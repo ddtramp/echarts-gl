@@ -100,8 +100,6 @@ export default echarts.ChartView.extend({
 
     _doRender: function (seriesModel, api) {
         var data = seriesModel.getData();
-        console.log('api :>> ', api)
-        console.log('data :>> ', data)
 
         var shading = seriesModel.get('shading');
         var enableNormal = shading !== 'color';
@@ -182,9 +180,6 @@ export default echarts.ChartView.extend({
             colorArr[1] = vertexColors[idx4++];
             colorArr[2] = vertexColors[idx4++];
             colorArr[3] = vertexColors[idx4++];
-
-            console.log('data :>> ', {start, dir, orient, size, colorArr, idx})
-
 
 
             if (colorArr[3] > 0) {

@@ -50,8 +50,6 @@
       chart.setOption({
         onlyOneGrid: true,
 
-        inverseBar3DIncludeZero: true,
-
         visualMap: {
           show: true,
           min,
@@ -104,6 +102,7 @@
         series: [
           {
             type: "bar3D",
+            inverseBar3DIncludeZero: false,
             data: data,
             barSize: 0.6,
           },
