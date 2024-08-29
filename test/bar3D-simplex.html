@@ -7,109 +7,497 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <!-- Fullscreen Landscape on iOS -->
     <link rel="stylesheet" href="./common.css" />
+
+    <style>
+      .charts {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .charts > div {
+        flex-basis: 28vw;
+        height: 28vh;
+      }
+    </style>
   </head>
   <body>
-    <div id="main"></div>
+    <div class="charts">
+      <div id="main1"></div>
+      <div id="main2"></div>
+      <div id="main3"></div>
+      <div id="main4"></div>
+      <div id="main5"></div>
+      <div id="main6"></div>
+      <div id="main7"></div>
+      <div id="main8"></div>
+      <div id="main9"></div>
+    </div>
+
     <script src="../node_modules/echarts/dist/echarts.js"></script>
     <script src="../dist/echarts-gl.js"></script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/simplex.js"></script>
     <script src="js/commonUI.js"></script>
     <script>
-      var chart = echarts.init(document.getElementById("main"));
+      class Queue {
+        constructor() {
+          this._items = [];
+        }
+
+        enqueue(item) {
+          this._items.push(item);
+        }
+
+        dequeue() {
+          return this._items.shift();
+        }
+
+        head() {
+          return this._items[0];
+        }
+
+        tail() {
+          return this._items[this._items.length - 1];
+        }
+
+        isEmpty() {
+          return !this._items.length;
+        }
+
+        size() {
+          return this._items.length;
+        }
+
+        clear() {
+          this._items = [];
+        }
+      }
+
+      const queue = new Queue();
+
+      /**
+       * CLEARABLE CUSTOM INTERVAL
+       * Do not to change the business logic of other modules
+       * @param callback  { Function }  Fn
+       * @param interval { Number }
+       * @return { Object } { timer: 123 }
+       */
+      const setIntervalClearable = (callback, interval) => {
+        const instance = { timer: null };
+        const now = Date.now;
+        let startTime = now();
+        let endTime = startTime;
+        const loop = () => {
+          instance.timer = window.requestAnimationFrame(loop);
+          endTime = now();
+          if (endTime - startTime >= interval) {
+            startTime = endTime = now();
+            callback(instance.timer);
+          }
+        };
+        instance.timer = window.requestAnimationFrame(loop);
+        return instance;
+      };
 
       var noise = new SimplexNoise(Math.random);
+
+      let generateDataIndex = 1;
+
+      let status = false;
+
       function generateData() {
         var data = [];
+
+        const gap = generateDataIndex % 2 === 1 ? 10 : 100;
+
+        generateDataIndex = generateDataIndex + 1;
         for (var i = 0; i <= 50; i++) {
           for (var j = 0; j <= 50; j++) {
             var value = noise.noise2D(i / 20, j / 20);
             valMax = Math.max(valMax, value);
             valMin = Math.min(valMin, value);
-            data.push([i, j, value * 2 + 4]);
+            data.push([i, j, Math.abs(Math.random() * 10 - Math.random() * gap)]);
           }
         }
         return data;
       }
       var valMin = Infinity;
       var valMax = -Infinity;
-      var data = generateData();
+      let data = generateData();
 
-      data = [
-        [10, 10, 10],
-        [20, 20, 0],
-        [30, 30, -10],
-        [40, 40, -40],
-      ];
+      // data = [
+      //   [10, 10, 10],
+      //   [20, 20, 0],
+      //   [30, 30, -10],
+      //   [40, 40, -40],
+      // ];
 
       const min = -80;
       const max = 0;
 
-      console.log(" min max :>> ", min, max);
+      console.log(' min max :>> ', min, max);
 
-      chart.setOption({
-        onlyOneGrid: true,
+      window.charts = {};
 
-        visualMap: {
-          show: true,
-          min,
-          max,
-          inRange: {
-            color: [
-              "#313695",
-              "#4575b4",
-              "#74add1",
-              "#abd9e9",
-              "#e0f3f8",
-              "#ffffbf",
-              "#fee090",
-              "#fdae61",
-              "#f46d43",
-              "#d73027",
-              "#a50026",
-            ],
-          },
-        },
-        xAxis3D: {
-          type: "value",
-        },
-        yAxis3D: {
-          type: "value",
-        },
-        zAxis3D: {
-          type: "value",
-          max,
-          min,
-        },
-        grid3D: {
-          axisLine: {
-            lineStyle: { color: "#fff" },
-          },
-          axisPointer: {
-            lineStyle: { color: "#fff" },
-          },
-          viewControl: {
-            // autoRotate: true
-          },
-          light: {
-            main: {
-              shadow: true,
-              quality: "ultra",
-              intensity: 1.5,
+      const getOption = data => {
+        const option = {
+          animation: false,
+          visualMap: {
+            type: 'continuous',
+            max: -140,
+            min: -150,
+            show: true,
+            itemWidth: 5,
+            dimension: 2,
+            itemHeight: 100,
+            inRange: {
+              color: ['#04ff00', '#ed9400', '#fd8000', '#fa0000', '#800000'],
+            },
+            textStyle: {
+              color: '#C2C6CA',
             },
           },
-        },
-        series: [
-          {
-            type: "bar3D",
-            inverseBar3DIncludeZero: false,
-            data: data,
-            barSize: 0.6,
+          tooltip: {
+            show: false,
+            appendToBody: true,
           },
-        ],
-      });
+          toolbox: {
+            show: false,
+            right: 10,
+            feature: {},
+          },
+          grid3D: {
+            boxWidth: 140,
+            boxHeight: 80,
+            boxDepth: 120,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            viewControl: {
+              distance: 210,
+              alpha: 8,
+              beta: 56,
+              center: [0, -16, 0],
+            },
+            axisPointer: {
+              show: false,
+            },
+            light: {
+              main: {
+                intensity: 1.2,
+                shadow: false,
+              },
+              ambient: {
+                intensity: 0.2,
+              },
+            },
+          },
+          onlyOneGrid: true,
+          xAxis3D: {
+            min: 0,
+            max: 50,
+            name: '周期',
+            nameTextStyle: {
+              fontSize: 10,
+              color: '#2c2c2d',
+              borderWidth: 1,
+              borderColor: 'transparent',
+            },
+            axisLabel: {
+              textStyle: {
+                color: '#2c2c2d',
+                fontSize: 8,
+                borderWidth: 1,
+                borderColor: 'transparent',
+              },
+            },
+            axisLine: {
+              lineStyle: {
+                color: '#C2C6CA',
+              },
+            },
+            nameGap: 20,
+            splitLine: {
+              lineStyle: {
+                type: 'dashed',
+                color: '#C2C6CA',
+              },
+            },
+            splitArea: {
+              show: true,
+              areaStyle: {
+                color: ['rgba(56, 123, 247, 0.1)'],
+              },
+            },
+          },
+          yAxis3D: {
+            min: 0,
+            max: 360,
+            name: '相位(°)',
+            interval: 90,
+            nameTextStyle: {
+              fontSize: 10,
+              color: '#2c2c2d',
+              borderWidth: 1,
+              borderColor: 'transparent',
+            },
+            axisLine: {
+              lineStyle: {
+                color: '#C2C6CA',
+              },
+            },
+            axisLabel: {
+              textStyle: {
+                color: '#2c2c2d',
+                fontSize: 8,
+                borderWidth: 1,
+                borderColor: 'transparent',
+              },
+            },
+            nameGap: 20,
+            splitLine: {
+              lineStyle: {
+                type: 'dashed',
+                color: '#C2C6CA',
+              },
+            },
+          },
+          zAxis3D: {
+            type: 'value',
+            name: '幅值(dBm)',
+            customZPosition: true,
+            customZPositionGap: 6,
+            nameGap: 20,
+            nameTextStyle: {
+              fontSize: 10,
+              color: '#2c2c2d',
+              borderWidth: 1,
+              borderColor: 'transparent',
+              align: 'left',
+            },
+            axisLabel: {
+              show: true,
+              textStyle: {
+                color: '#2c2c2d',
+                fontSize: 8,
+                borderWidth: 1,
+                borderColor: 'transparent',
+              },
+            },
+            axisLine: {
+              lineStyle: {
+                color: '#C2C6CA',
+              },
+            },
+            splitLine: {
+              lineStyle: {
+                type: 'dashed',
+                color: '#C2C6CA',
+              },
+            },
+            min: -150,
+            max: -140,
+          },
+          series: [
+            {
+              inverseBar3DIncludeZero: true,
+              animation: false,
+              silent: false,
+              name: 'PRPS',
+              type: 'bar3D',
+              data: data,
+              barSize: 0.4,
+              barGap: '80%',
+              barCategoryGap: '50%',
+              shading: 'color',
+              label: {
+                show: false,
+                fontSize: 16,
+                borderWidth: 1,
+              },
+              itemStyle: {
+                color: '#3BD0D3',
+              },
+              emphasis: {
+                label: {
+                  show: false,
+                  fontSize: 14,
+                  color: 'black',
+                },
+                itemStyle: {
+                  color: 'red',
+                },
+              },
+            },
+          ],
+        };
 
-      window.onresize = chart.resize;
+        return option;
+      };
+
+      const setChart = (id, shouldUpdateLabel = true) => {
+        let chart;
+        if (window.charts[id]) {
+          // charts[id].dispose();
+          chart = window.charts[id];
+        } else {
+          chart = echarts.init(document.getElementById(id));
+          window.charts[id] = chart;
+        }
+
+        let option = {
+          onlyOneGrid: true,
+          animation: false,
+
+          visualMap: {
+            show: true,
+            min,
+            max,
+            inRange: {
+              color: [
+                '#313695',
+                '#4575b4',
+                '#74add1',
+                '#abd9e9',
+                '#e0f3f8',
+                '#ffffbf',
+                '#fee090',
+                '#fdae61',
+                '#f46d43',
+                '#d73027',
+                '#a50026',
+              ],
+            },
+          },
+          xAxis3D: {
+            type: 'value',
+          },
+          yAxis3D: {
+            type: 'value',
+          },
+          zAxis3D: {
+            type: 'value',
+            // max,
+            // min,
+
+            name: '幅值(mV)',
+
+            customZPosition: true,
+            customZPositionGap: 6,
+
+            nameGap: 20,
+
+            nameTextStyle: {
+              align: 'left',
+            },
+          },
+          grid3D: {
+            afterRenderedUpdateAxisPosition: false, // AFTER RENDERED UPDATE Axis POSITION
+            showGridConfig: [true, true, false],
+
+            shouldUpdateLabel,
+
+            axisLine: {
+              lineStyle: { color: '#fff' },
+            },
+            axisPointer: {
+              lineStyle: { color: '#fff' },
+            },
+            viewControl: {
+              // autoRotate: true
+            },
+            light: {
+              main: {
+                shadow: true,
+                quality: 'ultra',
+                intensity: 1.5,
+              },
+            },
+          },
+          series: [
+            {
+              type: 'bar3D',
+              inverseBar3DIncludeZero: true,
+              data: data,
+              barSize: 0.6,
+            },
+          ],
+        };
+
+        // option = getOption(data);
+
+        console.time(id);
+        window.charts[id].setOption(option);
+        console.timeEnd(id);
+
+        // queue.enqueue({ id, option });
+      };
+
+      const ids = [];
+      const length = 1;
+      for (let i = 1; i <= length; i++) {
+        ids.push(`main${i}`);
+      }
+
+      let index = 0;
+
+      const setCharts = () => {
+        const shouldUpdateLabel = index === 0;
+
+        for (const id of ids) {
+          console.log(index, shouldUpdateLabel);
+
+          setChart(id, shouldUpdateLabel);
+          index = index + 1;
+        }
+      };
+
+      window.setCharts = setCharts;
+
+      const dispose = () => {
+        stop();
+        for (const id of ids) {
+          window.charts[id].dispose();
+        }
+
+        window.charts = [];
+      };
+
+      const fn = () => {
+        const size = queue.size();
+        if (size) {
+          const object = queue.dequeue();
+
+          window.charts[object.id].setOption(object.option);
+        }
+        requestAnimationFrame(fn);
+      };
+
+      // fn();
+
+      let interval;
+      window.start = () => {
+        status = true;
+        interval = setIntervalClearable(() => {
+          data = generateData();
+          setCharts();
+        }, 160);
+      };
+
+      window.stop = () => {
+        status = false;
+        cancelAnimationFrame(interval?.timer);
+        queue.clear();
+      };
+
+      window.clear = () => {
+        for (const item of ids) {
+          charts[item].clear();
+        }
+      };
     </script>
   </body>
 </html>
