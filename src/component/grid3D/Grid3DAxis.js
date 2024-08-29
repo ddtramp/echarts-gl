@@ -47,7 +47,7 @@ var otherDim = {
   x: 'y', y: 'x', z: 'y'
 }
 Grid3DAxis.prototype.update = function(
-  grid3DModel, axisLabelSurface, api
+  grid3DModel, axisLabelSurface, api, textAlign, verticalAlign, isPRPS
 ) {
   var cartesian = grid3DModel.coordinateSystem
   var axis = cartesian.getAxis(this.dim)
@@ -160,7 +160,7 @@ Grid3DAxis.prototype.update = function(
 
       var coords = axisLabelSurface.add(textEl)
       var rect = textEl.getBoundingRect()
-      labelsGeo.addSprite(p, [rect.width * dpr, rect.height * dpr], coords)
+      labelsGeo.addSprite(p, [rect.width * dpr, rect.height * dpr], coords, textAlign, verticalAlign)
 
       this.labelElements.push(textEl)
     }
@@ -200,7 +200,12 @@ Grid3DAxis.prototype.update = function(
 
     var coords = axisLabelSurface.add(textEl)
     var rect = textEl.getBoundingRect()
-    labelsGeo.addSprite(p, [rect.width * dpr, rect.height * dpr], coords)
+
+    if (isPRPS && this.dim === 'z') { 
+      textAlign = 'left'
+    }
+
+    labelsGeo.addSprite(p, [rect.width * dpr, rect.height * dpr], coords, textAlign, verticalAlign)
 
     textEl.__idx = this.labelElements.length
     this.nameLabelElement = textEl

@@ -164,15 +164,66 @@ export default echarts.ComponentView.extend({
     const viewControlModel = grid3DModel.getModel('viewControl')
     control.setFromViewControlModel(viewControlModel, 0)
 
-    this._axisLabelSurface.clear()
+    const isPRPS= grid3DModel?.option?.isPRPS ?? false
+    const shouldUpdateLabel = grid3DModel?.option?.shouldUpdateLabel ?? false
+
+    const isPRPSRefresh = (isPRPS && shouldUpdateLabel)
+
+    if (!isPRPSRefresh) {
+      this._axisLabelSurface.clear()
+    } 
 
     control.off('update')
     if (grid3DModel.get('show')) {
       this._faces.forEach(face => {
         face.update(grid3DModel, ecModel, api)
       }, this)
+
+      const camera = this._control.getCamera()
+      const coords = [new graphicGL.Vector4(), new graphicGL.Vector4()]
+      const center = new graphicGL.Vector4()
+      this.groupGL.getWorldPosition(center)
+      center.w = 1.0
+      center.transformMat4(camera.viewMatrix).transformMat4(camera.projectionMatrix)
+      center.x /= center.w
+      center.y /= center.w
+
       this._axes.forEach(function(axis) {
-        axis.update(grid3DModel, this._axisLabelSurface, api)
+
+        let textAlign
+        let verticalAlign
+
+        const axisInfo = axis
+        const lineCoords = axisInfo?.axisLineCoords ?? null
+        
+        if (lineCoords) {
+          for (let i = 0; i < coords.length; i++) {
+            coords[i].setArray(lineCoords[i])
+            coords[i].w = 1.0
+            coords[i]
+              .transformMat4(axisInfo.rootNode.worldTransform)
+              .transformMat4(camera.viewMatrix)
+              .transformMat4(camera.projectionMatrix)
+            coords[i].x /= coords[i].w
+            coords[i].y /= coords[i].w
+          }
+          const dx = coords[1].x - coords[0].x
+          const dy = coords[1].y - coords[0].y
+          const cx = (coords[1].x + coords[0].x) / 2
+          const cy = (coords[1].y + coords[0].y) / 2
+    
+          if (Math.abs(dy / dx) < 0.5) {
+            textAlign = 'center'
+            verticalAlign = cy > center.y ? 'bottom' : 'top'
+          } else {
+            verticalAlign = 'middle'
+            textAlign = cx > center.x ? 'left' : 'right'
+          }
+        }
+
+        if (!isPRPSRefresh) {
+          axis.update(grid3DModel, this._axisLabelSurface, api, textAlign, verticalAlign, isPRPS)
+        }
       }, this)
     }
 
@@ -403,6 +454,7 @@ export default echarts.ComponentView.extend({
     center.y /= center.w
     this._axes.forEach(function(axisInfo) {
       const lineCoords = axisInfo.axisLineCoords
+
       const labelGeo = axisInfo.labelsMesh.geometry
       for (let i = 0; i < coords.length; i++) {
         coords[i].setArray(lineCoords[i])
@@ -428,8 +480,8 @@ export default echarts.ComponentView.extend({
         textAlign = cx > center.x ? 'left' : 'right'
       }
 
-      // axis labels
-      axisInfo.setSpriteAlign(textAlign, verticalAlign, this._api)
+        // axis labels
+        axisInfo.setSpriteAlign(textAlign, verticalAlign, this._api)
     }, this)
   },
 
