@@ -35,6 +35,8 @@ export default echarts.ComponentView.extend({
   __ecgl__: true,
 
   init(ecModel, api) {
+    const isPRPS= ecModel?.option.grid3D[0].isPRPS ?? false
+
     const FACES = [
       // planeDim0, planeDim1, offsetDim, dir on dim3 axis(gl), plane.
       ['y', 'z', 'x', -1, 'left'], // 1
@@ -53,10 +55,18 @@ export default echarts.ComponentView.extend({
 
     FACES.forEach(face => {
       if (face[0] === 'y') {
-        face.push(showGridConfig[0])
+        if (isPRPS && face[4] === 'right') {
+          face.push(false)
+        } else {
+          face.push(showGridConfig[0])
+        }
       }
       if (face[1] === 'y') {
-        face.push(showGridConfig[1])
+        if (isPRPS && face[4] === 'top') {
+          face.push(false)
+        } else {
+          face.push(showGridConfig[1])
+        }
       }
       if (face[2] === 'y') {
         face.push(showGridConfig[2])
@@ -175,9 +185,17 @@ export default echarts.ComponentView.extend({
 
     control.off('update')
     if (grid3DModel.get('show')) {
+
       this._faces.forEach(face => {
-        face.update(grid3DModel, ecModel, api)
+        const faceInfo = face.faceInfo
+        if (faceInfo[5] || (isPRPS && faceInfo[4] === 'bottom')) {
+          face.update(grid3DModel, ecModel, api)
+        }
       }, this)
+      // const _faces = this._faces
+      // if (_faces.length) {
+      //   _faces[0].update(grid3DModel, ecModel, api)
+      // }
 
       const camera = this._control.getCamera()
       const coords = [new graphicGL.Vector4(), new graphicGL.Vector4()]
@@ -336,7 +354,12 @@ export default echarts.ComponentView.extend({
 
   _onCameraChange(grid3DModel, api) {
     if (grid3DModel.get('show')) {
-      this._updateFaceVisibility()
+
+      const isPRPS= grid3DModel.ecModel?.option.grid3D[0].isPRPS ?? false
+      
+      if (!isPRPS) {
+        this._updateFaceVisibility()
+      }
       this._updateAxisLinePosition()
     }
 
@@ -387,6 +410,9 @@ export default echarts.ComponentView.extend({
     // Put xAxis, yAxis on x, y visible plane.
     // Put zAxis on the left.
     // TODO
+
+    // const isPRPS = this._model.ecModel?.option.grid3D[0].isPRPS ?? false
+
     const cartesian = this._model.coordinateSystem
     const xAxis = cartesian.getAxis('x')
     const yAxis = cartesian.getAxis('y')
