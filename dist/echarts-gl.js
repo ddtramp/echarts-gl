@@ -54196,8 +54196,11 @@ Grid3DFace.prototype.update = function(grid3DModel, ecModel, api) {
   quadsGeometry.convertToDynamicArray(true)
   this._updateSplitLines(lineGeometry, axes, grid3DModel, api)
   this._udpateSplitAreas(quadsGeometry, axes, grid3DModel, api)
-  lineGeometry.convertToTypedArray()
-  quadsGeometry.convertToTypedArray()
+
+ const isPRPS = grid3DModel?.option?.isPRPS ?? false
+
+  lineGeometry.convertToTypedArray(isPRPS)
+  quadsGeometry.convertToTypedArray(isPRPS)
 
   const otherAxis = cartesian.getAxis(this.faceInfo[2])
   updateFacePlane(this.rootNode, this.plane, otherAxis, this.faceInfo[3])
@@ -54352,6 +54355,8 @@ const Grid3DView_dimIndicesMap = {
   __ecgl__: true,
 
   init(ecModel, api) {
+    const isPRPS= ecModel?.option.grid3D[0].isPRPS ?? false
+
     const FACES = [
       // planeDim0, planeDim1, offsetDim, dir on dim3 axis(gl), plane.
       ['y', 'z', 'x', -1, 'left'], // 1
@@ -54370,10 +54375,18 @@ const Grid3DView_dimIndicesMap = {
 
     FACES.forEach(face => {
       if (face[0] === 'y') {
-        face.push(showGridConfig[0])
+        if (isPRPS && face[4] === 'right') {
+          face.push(false)
+        } else {
+          face.push(showGridConfig[0])
+        }
       }
       if (face[1] === 'y') {
-        face.push(showGridConfig[1])
+        if (isPRPS && face[4] === 'top') {
+          face.push(false)
+        } else {
+          face.push(showGridConfig[1])
+        }
       }
       if (face[2] === 'y') {
         face.push(showGridConfig[2])
@@ -54492,9 +54505,17 @@ const Grid3DView_dimIndicesMap = {
 
     control.off('update')
     if (grid3DModel.get('show')) {
+
       this._faces.forEach(face => {
-        face.update(grid3DModel, ecModel, api)
+        const faceInfo = face.faceInfo
+        if (faceInfo[5] || (isPRPS && faceInfo[4] === 'bottom')) {
+          face.update(grid3DModel, ecModel, api)
+        }
       }, this)
+      // const _faces = this._faces
+      // if (_faces.length) {
+      //   _faces[0].update(grid3DModel, ecModel, api)
+      // }
 
       const camera = this._control.getCamera()
       const coords = [new src_util_graphicGL.Vector4(), new src_util_graphicGL.Vector4()]
@@ -54555,13 +54576,13 @@ const Grid3DView_dimIndicesMap = {
 
     this._initMouseHandler(grid3DModel)
 
-    if (
-      // jack add this
-      Reflect.has(grid3DModel.option, 'afterRenderedUpdateAxisPosition') &&
-      grid3DModel.option.afterRenderedUpdateAxisPosition
-    ) {
-      this._updateAxisLinePosition()
-    }
+    // if (
+    //   // jack add this
+    //   Reflect.has(grid3DModel.option, 'afterRenderedUpdateAxisPosition') &&
+    //   grid3DModel.option.afterRenderedUpdateAxisPosition
+    // ) {
+    //   this._updateAxisLinePosition()
+    // }
   },
 
   afterRender(grid3DModel, ecModel, api, layerGL) {
@@ -54653,7 +54674,12 @@ const Grid3DView_dimIndicesMap = {
 
   _onCameraChange(grid3DModel, api) {
     if (grid3DModel.get('show')) {
-      this._updateFaceVisibility()
+
+      const isPRPS= grid3DModel.ecModel?.option.grid3D[0].isPRPS ?? false
+      
+      if (!isPRPS) {
+        this._updateFaceVisibility()
+      }
       this._updateAxisLinePosition()
     }
 
@@ -54704,6 +54730,9 @@ const Grid3DView_dimIndicesMap = {
     // Put xAxis, yAxis on x, y visible plane.
     // Put zAxis on the left.
     // TODO
+
+    // const isPRPS = this._model.ecModel?.option.grid3D[0].isPRPS ?? false
+
     const cartesian = this._model.coordinateSystem
     const xAxis = cartesian.getAxis('x')
     const yAxis = cartesian.getAxis('y')
@@ -56162,8 +56191,8 @@ function signedArea(data, start, end, dim) {
         if (this.indices && this.indices.length > 0) {
             this.indices = this.vertexCount > 0xffff ? new Uint32Array(this.indices) : new Uint16Array(this.indices);
         }
-
-        this.dirty();
+        
+        // this.dirty(); // bar3D setOption running lag when refresh with 200ms interval 
     }
 });
 ;// CONCATENATED MODULE: ./src/util/geometry/Lines3D.js
