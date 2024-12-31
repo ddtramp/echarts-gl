@@ -81,8 +81,11 @@ Grid3DFace.prototype.update = function(grid3DModel, ecModel, api) {
   quadsGeometry.convertToDynamicArray(true)
   this._updateSplitLines(lineGeometry, axes, grid3DModel, api)
   this._udpateSplitAreas(quadsGeometry, axes, grid3DModel, api)
-  lineGeometry.convertToTypedArray()
-  quadsGeometry.convertToTypedArray()
+
+ const isPRPS = grid3DModel?.option?.isPRPS ?? false
+
+  lineGeometry.convertToTypedArray(isPRPS)
+  quadsGeometry.convertToTypedArray(isPRPS)
 
   const otherAxis = cartesian.getAxis(this.faceInfo[2])
   updateFacePlane(this.rootNode, this.plane, otherAxis, this.faceInfo[3])
