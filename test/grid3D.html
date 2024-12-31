@@ -18,7 +18,7 @@
     <script src="js/commonUI.js"></script>
     <script src="./lodash.min.js"></script>
     <script>
-      var chart = echarts.init(document.getElementById("main"));
+      var chart = echarts.init(document.getElementById('main'));
 
       let extraPrpsOptionData = {
         distance: 250,
@@ -30,7 +30,7 @@
 
       const getMax = (value = { min: 0, max: 0 }, inverse = false) => {
         const max = Math.max(Math.abs(value.min), Math.abs(value.max));
-        const maxString = max.toString().split(".")[0];
+        const maxString = max.toString().split('.')[0];
         const length = maxString.length;
         const res = (parseInt(maxString[0], 10) + 1) * Math.pow(10, length - 1);
         if (inverse) {
@@ -1502,12 +1502,12 @@
         max = getMax({ min: Math.min(...dataY), max: Math.max(...dataY) });
 
         return {
-          backgroundColor: "#fff",
+          backgroundColor: '#fff',
           tooltip: { show: false },
           xAxis3D: {
-            id: "x",
+            id: 'x',
             nameTextStyle: {
-              color: "red",
+              color: 'red',
               padding: [10, 10, 10, 10],
               fontSize: 10,
             },
@@ -1523,7 +1523,7 @@
             axisLine: {
               lineStyle: {
                 width: 5,
-                color: "#900",
+                color: '#900',
               },
             },
             splitLine: {
@@ -1532,21 +1532,21 @@
             splitArea: {
               show: true,
               areaStyle: {
-                color: ["yellow"],
+                color: ['yellow'],
               },
             },
           },
           yAxis3D: {
-            id: "y",
+            id: 'y',
             nameTextStyle: {
-              color: "red",
+              color: 'red',
               padding: [10, 10, 10, 10],
               fontSize: 10,
             },
             max: 360,
             interval: 90,
             axisLabel: {
-              color: "#2c2c2d",
+              color: '#2c2c2d',
               fontSize: 10,
 
               formatter: function (v) {
@@ -1557,26 +1557,26 @@
             // data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
           },
           zAxis3D: {
-            id: "z",
-            type: "value",
-            name: "幅值（dBm）",
+            id: 'z',
+            type: 'value',
+            name: '幅值（dBm）',
             nameTextStyle: {
-              color: "red",
+              color: 'red',
               padding: [10, 10, 10, 10],
               fontSize: 10,
-              align: "left",
+              align: 'left',
             },
 
             customZPosition: true,
             customZPositionGap: 6,
-            textAlign: "left",
+            textAlign: 'left',
 
             min: 0,
             max,
             splitArea: {
               show: true,
               areaStyle: {
-                color: ["blue"],
+                color: ['blue'],
               },
             },
           },
@@ -1612,6 +1612,9 @@
               },
             },
 
+            isPRPS: true,
+            afterRenderedUpdateAxisPosition: true, // AFTER RENDERED UPDATE Axis POSITION
+
             // jack add next line
             // afterRenderedUpdateAxisPosition: true, // AFTER RENDERED UPDATE Axis POSITION
             showGridConfig: [true, true, false], // [front, bottom, right] means [1, 2, 3]
@@ -1620,27 +1623,27 @@
           series: [
             {
               silent: true,
-              name: "PRPS",
-              type: "bar3D",
+              name: 'PRPS',
+              type: 'bar3D',
               data,
               barSize: 1,
-              barGap: "80%",
-              barCategoryGap: "50%",
-              shading: "color",
+              barGap: '80%',
+              barCategoryGap: '50%',
+              shading: 'color',
               label: {
                 fontSize: 16,
                 borderWidth: 1,
               },
               itemStyle: {
-                color: "#3BD0D3",
+                color: '#3BD0D3',
               },
               emphasis: {
                 label: {
                   fontSize: 14,
-                  color: "black",
+                  color: 'black',
                 },
                 itemStyle: {
-                  color: "red",
+                  color: 'red',
                 },
               },
             },
@@ -1650,7 +1653,7 @@
 
       chart.setOption(getOption(max, data1, extraPrpsOptionData));
 
-      window.addEventListener("resize", function () {
+      window.addEventListener('resize', function () {
         chart.resize();
       });
 
@@ -1668,7 +1671,7 @@
         }
       }, 200);
 
-      chart.on("finished", finishFn);
+      chart.on('finished', finishFn);
 
       // chart.on('rendered', (e) => {
       //     console.log('rendered', e)
@@ -1704,9 +1707,9 @@
       };
 
       const handleVisible = () => {
-        if (document.visibilityState === "visible") {
+        if (document.visibilityState === 'visible') {
           if (chart.isDisposed()) {
-            chart = echarts.init(document.getElementById("main"));
+            chart = echarts.init(document.getElementById('main'));
             chart.setOption(getOption(max, data1, extraPrpsOptionData));
           }
         } else {
@@ -1716,7 +1719,7 @@
         }
       };
 
-      document.addEventListener("visibilitychange", handleVisible);
+      document.addEventListener('visibilitychange', handleVisible);
     </script>
   </body>
 </html>
