@@ -357,10 +357,12 @@ export default echarts.ComponentView.extend({
 
       const isPRPS= grid3DModel.ecModel?.option.grid3D[0].isPRPS ?? false
       
+      const PRPSRefresh = grid3DModel.ecModel?.option.grid3D[0].PRPSRefresh ?? false
+
       if (!isPRPS) {
         this._updateFaceVisibility()
       }
-      this._updateAxisLinePosition()
+      this._updateAxisLinePosition(PRPSRefresh)
     }
 
     const control = this._control
@@ -406,7 +408,7 @@ export default echarts.ComponentView.extend({
    * Update axis line position when camera view changed.
    * @private
    */
-  _updateAxisLinePosition() {
+  _updateAxisLinePosition(PRPSRefresh = false) {
     // Put xAxis, yAxis on x, y visible plane.
     // Put zAxis on the left.
     // TODO
@@ -461,14 +463,14 @@ export default echarts.ComponentView.extend({
     yAxisNode.update()
     zAxisNode.update()
 
-    this._updateAxisLabelAlign()
+    this._updateAxisLabelAlign(PRPSRefresh)
   },
 
   /**
    * Update label align on axis when axisLine position changed.
    * @private
    */
-  _updateAxisLabelAlign() {
+  _updateAxisLabelAlign(PRPSRefresh = false) {
     // var cartesian = this._model.coordinateSystem;
     const camera = this._control.getCamera()
     const coords = [new graphicGL.Vector4(), new graphicGL.Vector4()]
@@ -507,7 +509,7 @@ export default echarts.ComponentView.extend({
       }
 
         // axis labels
-        axisInfo.setSpriteAlign(textAlign, verticalAlign, this._api)
+        axisInfo.setSpriteAlign(textAlign, verticalAlign, this._api, PRPSRefresh)
     }, this)
   },
 

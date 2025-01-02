@@ -218,7 +218,7 @@ Grid3DAxis.prototype.update = function(
   labelsGeo.convertToTypedArray()
 }
 
-Grid3DAxis.prototype.setSpriteAlign = function(textAlign, textVerticalAlign, api) {
+Grid3DAxis.prototype.setSpriteAlign = function(textAlign, textVerticalAlign, api, PRPSRefresh = false) {
   var dpr = api.getDevicePixelRatio()
   var labelGeo = this.labelsMesh.geometry
   for (var i = 0; i < this.labelElements.length; i++) {
@@ -235,7 +235,8 @@ Grid3DAxis.prototype.setSpriteAlign = function(textAlign, textVerticalAlign, api
     const align = this.nameTextAlign || textAlign
 
     labelGeo.setSpriteAlign(nameLabelEl.__idx, [rect.width * dpr, rect.height * dpr], align, textVerticalAlign)
-    labelGeo.dirty()
+    
+    !PRPSRefresh && labelGeo.dirty()
   }
 
   this.textAlign = textAlign
