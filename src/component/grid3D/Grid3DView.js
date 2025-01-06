@@ -256,13 +256,13 @@ export default echarts.ComponentView.extend({
 
     this._initMouseHandler(grid3DModel)
 
-    if (
-      // jack add this
-      Reflect.has(grid3DModel.option, 'afterRenderedUpdateAxisPosition') &&
-      grid3DModel.option.afterRenderedUpdateAxisPosition
-    ) {
-      this._updateAxisLinePosition(true)
-    }
+    // if (
+    //   // jack add this
+    //   Reflect.has(grid3DModel.option, 'afterRenderedUpdateAxisPosition') &&
+    //   grid3DModel.option.afterRenderedUpdateAxisPosition
+    // ) {
+    //   this._updateAxisLinePosition(true)
+    // }
   },
 
   afterRender(grid3DModel, ecModel, api, layerGL) {
