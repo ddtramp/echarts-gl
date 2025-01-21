@@ -28091,7 +28091,7 @@ graphicGL_graphicGL.Frustum = math_Frustum;
 // Texture utilities
 var graphicGL_blankImage = null;
 
-function getBlankImage() {
+function graphicGL_getBlankImage() {
     if (graphicGL_blankImage !== null) {
         return graphicGL_blankImage;
     }
@@ -28245,7 +28245,7 @@ graphicGL_graphicGL.loadTexture = function (imgValue, api, textureOpts, cb) {
                 originalImage.crossOrigin = 'Anonymous';
                 originalImage.src = imgValue;
                 // Use blank image as place holder.
-                texture.image = getBlankImage();
+                texture.image = graphicGL_getBlankImage();
 
                 textureCache.put(prefix + imgValue, textureObj);
             }
@@ -53982,7 +53982,7 @@ Grid3DAxis.prototype.update = function(
   labelsGeo.convertToTypedArray()
 }
 
-Grid3DAxis.prototype.setSpriteAlign = function(textAlign, textVerticalAlign, api) {
+Grid3DAxis.prototype.setSpriteAlign = function(textAlign, textVerticalAlign, api, PRPSRefresh = false) {
   var dpr = api.getDevicePixelRatio()
   var labelGeo = this.labelsMesh.geometry
   for (var i = 0; i < this.labelElements.length; i++) {
@@ -53999,7 +53999,8 @@ Grid3DAxis.prototype.setSpriteAlign = function(textAlign, textVerticalAlign, api
     const align = this.nameTextAlign || textAlign
 
     labelGeo.setSpriteAlign(nameLabelEl.__idx, [rect.width * dpr, rect.height * dpr], align, textVerticalAlign)
-    labelGeo.dirty()
+    
+    !PRPSRefresh && labelGeo.dirty()
   }
 
   this.textAlign = textAlign
@@ -54591,7 +54592,7 @@ const Grid3DView_dimIndicesMap = {
     //   Reflect.has(grid3DModel.option, 'afterRenderedUpdateAxisPosition') &&
     //   grid3DModel.option.afterRenderedUpdateAxisPosition
     // ) {
-    //   this._updateAxisLinePosition()
+    //   this._updateAxisLinePosition(true)
     // }
   },
 
@@ -54687,10 +54688,12 @@ const Grid3DView_dimIndicesMap = {
 
       const isPRPS= grid3DModel.ecModel?.option.grid3D[0].isPRPS ?? false
       
+      const PRPSRefresh = grid3DModel.ecModel?.option.grid3D[0].PRPSRefresh ?? false
+
       if (!isPRPS) {
         this._updateFaceVisibility()
       }
-      this._updateAxisLinePosition()
+      this._updateAxisLinePosition(PRPSRefresh)
     }
 
     const control = this._control
@@ -54736,7 +54739,7 @@ const Grid3DView_dimIndicesMap = {
    * Update axis line position when camera view changed.
    * @private
    */
-  _updateAxisLinePosition() {
+  _updateAxisLinePosition(PRPSRefresh = false) {
     // Put xAxis, yAxis on x, y visible plane.
     // Put zAxis on the left.
     // TODO
@@ -54791,14 +54794,14 @@ const Grid3DView_dimIndicesMap = {
     yAxisNode.update()
     zAxisNode.update()
 
-    this._updateAxisLabelAlign()
+    this._updateAxisLabelAlign(PRPSRefresh)
   },
 
   /**
    * Update label align on axis when axisLine position changed.
    * @private
    */
-  _updateAxisLabelAlign() {
+  _updateAxisLabelAlign(PRPSRefresh = false) {
     // var cartesian = this._model.coordinateSystem;
     const camera = this._control.getCamera()
     const coords = [new src_util_graphicGL.Vector4(), new src_util_graphicGL.Vector4()]
@@ -54837,7 +54840,7 @@ const Grid3DView_dimIndicesMap = {
       }
 
         // axis labels
-        axisInfo.setSpriteAlign(textAlign, verticalAlign, this._api)
+        axisInfo.setSpriteAlign(textAlign, verticalAlign, this._api, PRPSRefresh)
     }, this)
   },
 
@@ -57938,7 +57941,7 @@ Geo3DBuilder.prototype = {
                 itemStyleModel.get('color'),
                 '#fff'
             );
-            var opacity = util_retrieve.firstNotNull(getItemVisualOpacity(data, dataIndex), 1);
+            var opacity = util_retrieve.firstNotNull(getItemVisualOpacity(data, dataIndex), itemStyleModel.get('opacity'), 1);
 
             var colorArr = util_graphicGL.parseColor(color);
             var borderColorArr = util_graphicGL.parseColor(itemStyleModel.get('borderColor'));
@@ -58417,12 +58420,14 @@ Geo3DBuilder.prototype = {
             return;
         }
 
+        var itemStyleModel = data.getItemModel(dataIndex);
         var color = util_retrieve.firstNotNull(
             getItemVisualColor(data, dataIndex),
-            data.getItemModel(dataIndex).get(['itemStyle', 'color']),
+            itemStyleModel.get(['itemStyle', 'color']),
             '#fff'
         );
-        var opacity = util_retrieve.firstNotNull(getItemVisualOpacity(data, dataIndex), 1);
+
+        var opacity = util_retrieve.firstNotNull(getItemVisualOpacity(data, dataIndex), itemStyleModel.get(['itemStyle', 'opacity']), 1);
 
         var colorArr = util_graphicGL.parseColor(color);
         colorArr[3] *= opacity;
@@ -61314,16 +61319,7 @@ function EffectCompositor_EffectCompositor() {
 
     this._normalPass = new src_effect_NormalPass();
 
-<<<<<<< HEAD
-            var color = util_retrieve.firstNotNull(
-                getItemVisualColor(data, dataIndex),
-                itemStyleModel.get('color'),
-                '#fff'
-            );
-            var opacity = util_retrieve.firstNotNull(getItemVisualOpacity(data, dataIndex), itemStyleModel.get('opacity'), 1);
-=======
     this._compositor = compositor_createCompositor(effect_composite);
->>>>>>> jackversion
 
     var sourceNode = this._compositor.getNodeByName('source');
     sourceNode.texture = this._sourceTexture;
@@ -61938,27 +61934,10 @@ TemporalSuperSampling_TemporalSuperSampling.prototype = {
             this._outputPass.render(renderer);
         }
 
-<<<<<<< HEAD
-        var itemStyleModel = data.getItemModel(dataIndex);
-        var color = util_retrieve.firstNotNull(
-            getItemVisualColor(data, dataIndex),
-            itemStyleModel.get(['itemStyle', 'color']),
-            '#fff'
-        );
-
-        var opacity = util_retrieve.firstNotNull(getItemVisualOpacity(data, dataIndex), itemStyleModel.get(['itemStyle', 'opacity']), 1);
-
-        var colorArr = util_graphicGL.parseColor(color);
-        colorArr[3] *= opacity;
-
-        this._setColorOfDataIndex(data, dataIndex, colorArr);
-    },
-=======
         // Swap texture
         var tmp = this._prevFrameTex;
         this._prevFrameTex = this._outputTex;
         this._outputTex = tmp;
->>>>>>> jackversion
 
         this._frame++;
     },
